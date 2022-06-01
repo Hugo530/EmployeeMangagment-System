@@ -2,6 +2,7 @@
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const consoleTable = require('console.table');
+const { resourceLimits } = require('worker_threads');
 
 
 // create database connection
@@ -91,5 +92,73 @@ const addDept = () => {
   .then((response) => {
     genDept(response);
   })
+};
+
+const genDept = (data) => {
+  const {deptName} = data;
+  const params = [deptName];
+  const sql = `INSERT INTO department (name) VALUES (?)`;
+  db.promise().query(sql, params)
+  .then(`Added new department: ${deptName}`)
+  .catch(console.log)
+  .then( () => openMenu());
+};
+
+const viewRoles = () => {
+  const sql = `SELECT role.id AS id, role.title AS title, department.name AS department, role.salary AS salary FROM role JOIN department on a role.dept_id = department.id`;
+
+  db.promise().query(sql)
+  .then(([rows, fields]) => {
+    const table = consoleTable.getTable(rows);
+    console.log(table);
+  })
+
+  .catch(console.log)
+  .then( () => openMenu());
+};
+
+const addRole = () => {
+  let sql = "SELECT * FROM department";
+  db.query(sql, (err, result) => {
+      if (err) throw err;
+      inquirer.prompt([
+          {
+              type: "input",
+              message: "What is the title of this role?",
+              name: "roleTitle",
+          },
+          {
+              type: "number",
+              message: "What is the salary for this position?",
+              name: "roleSalary",
+          },
+          {
+              type: "list",
+              message: "Please choose a department",
+              // choices uses a function to get data from the department table so it can build a list of the department names for the user to pick from
+              choices: () => {
+                  const choices = [];
+                  for (let i = 0; i < result.length; i++) {
+                      choices.push(result[i].name);
+                  }
+                  return choices;
+              },
+              name: "department"
+          }
+      ]).then(answer => {
+          let dept_id; 
+          for (let i = 0; i < result.length; i++) {
+              if (result[i].name === answer.department) {
+                  dept_id = result[i].id;
+              }
+          }
+          sql = "INSERT INTO role (title, salary, dept_id) VALUES (?, ?, ?)";
+          db.query(sql, [answer.roleTitle, answer.roleSalary, dept_id], (err, res) => {
+              if (err) throw err;
+
+              openMenu();
+          });
+      });
+  });
 };
 
