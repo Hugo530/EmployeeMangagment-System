@@ -1,19 +1,17 @@
 {
-  "name": "EMPLOYEEMANAGMENT-SYSTEM",
+  "name": "employee-tracker",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "index.js"
+    "start": "node index"
   },
-  "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
+    "asciiart-logo": "^0.2.6",
     "console.table": "^0.10.0",
-    "dotenv": "^16.0.0",
-    "inquirer": "^8.2.4",
-    "mysql2": "^2.3.3"
+    "inquirer": "^7.0.0",
+    "mysql2": "^2.1.0"
   }
 }
